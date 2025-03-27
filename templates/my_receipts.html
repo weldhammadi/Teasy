@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+
+{% block title %}Mes Tickets{% endblock %}
+
+{% block content %}
+<div class="page-header shadow-sm">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">
+                <i class="bi bi-receipt me-2"></i>Mes Tickets
+            </h2>
+            <a href="{{ url_for('profile') }}" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-person me-2"></i>Mon Profil
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="card filters-card shadow-sm mb-4">
+    <div class="card-body">
+        <form class="row g-3">
+            <div class="col-md-4">
+                <label for="date-filter" class="form-label">Période</label>
+                <select class="form-select" id="date-filter" name="date_filter">
+                    <option value="all">Tous les tickets</option>
+                    <option value="7">7 derniers jours</option>
+                    <option value="30" selected>30 derniers jours</option>
+                    <option value="90">3 derniers mois</option>
+                    <option value="365">12 derniers mois</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="store-filter" class="form-label">Magasin</label>
+                <select class="form-select" id="store-filter" name="store_filter">
+                    <option value="all" selected>Tous les magasins</option>
+                    <option value="Carrefour">Carrefour</option>
+                    <option value="Auchan">Auchan</option>
+                    <option value="Leclerc">Leclerc</option>
+                    <option value="Monoprix">Monoprix</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="sort-order" class="form-label">Tri</label>
+                <select class="form-select" id="sort-order" name="sort_order">
+                    <option value="date-desc" selected>Date (plus récent)</option>
+                    <option value="date-asc">Date (plus ancien)</option>
+                    <option value="amount-desc">Montant (décroissant)</option>
+                    <option value="amount-asc">Montant (croissant)</option>
+                </select>
+            </div>
+            <div class="col-12 d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-funnel me-2"></i>Filtrer
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Dashboard Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="card-body text-center p-4">
+                <div class="stat-icon">
+                    <i class="bi bi-receipt"></i>
+                </div>
+                <div class="stat-value">{{ transactions|length }}</div>
+                <p class="stat-label">Total de transactions</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="card-body text-center p-4">
+                <div class="stat-icon">
+                    <i class="bi bi-cash-coin"></i>
+                </div>
+                <div class="stat-value">{{ "%.2f"|format(transactions|sum(attribute='montant_total')|default(0)|float) }} €</div>
+                <p class="stat-label">Dépenses totales</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="card-body text-center p-4">
+                <div class="stat-icon">
+                    <i class="bi bi-award"></i>
+                </div>
+                <div class="stat-value">{{ transactions|sum(attribute='points_gagnes')|default(0) }}</div>
+                <p class="stat-label">Points gagnés</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if transactions %}
+<div class="card shadow-sm mb-4">
+    <div class="card-header-custom d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            <i class="bi bi-list-check me-2"></i>Historique des transactions
+        </h5>
+        <div>
+            <button class="btn btn-sm btn-light" id="toggleViewBtn">
+                <i class="bi bi-grid me-1"></i>Changer de vue
+            </button>
+        </div>
+    </div>
+    
+    <!-- Vue en liste (par défaut) -->
+    <div id="listView">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Magasin</th>
+                        <th class="text-end">Montant</th>
+                        <th class="text-center">Points</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in transactions %}
+                    <tr>
+                        <td>{{ transaction.date_transaction }}</td>
+                        <td class="store-name">{{ transaction.magasin_nom|default('Magasin inconnu', true) }}</td>
+                        <td class="text-end transaction-amount">{{ "%.2f"|format(transaction.montant_total|float) }} €</td>
+                        <td class="text-center">
+                            <span class="badge points-badge-success">+{{ transaction.points_gagnes }}</span>
+                        </td>
+                        <td class="text-end">
+                            <a href="{{ url_for('transaction_detail', transaction_id=transaction.transaction_id) }}" class="btn btn-sm btn-view">
+                                <i class="bi bi-eye"></i> Voir
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Vue en grille (alternative) -->
+    <div id="gridView" style="display: none;">
+        <div class="card-body">
+            <div class="row g-4">
+                {% for transaction in transactions %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card transaction-card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="badge bg-light text-dark">{{ transaction.date_transaction }}</span>
+                                <span class="badge points-badge-success">+{{ transaction.points_gagnes }} pts</span>
+                            </div>
+                            <h5 class="card-title">{{ transaction.magasin_nom|default('Magasin inconnu', true) }}</h5>
+                            <p class="card-text transaction-amount mb-3">{{ "%.2f"|format(transaction.montant_total|float) }} €</p>
+                            <div class="d-flex justify-content-end">
+                                <a href="{{ url_for('transaction_detail', transaction_id=transaction.transaction_id) }}" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-eye me-2"></i>Détails
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pagination -->
+<nav aria-label="Navigation des pages" class="mt-4">
+    <ul class="pagination justify-content-center">
+        <li class="page-item disabled">
+            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Précédent</a>
+        </li>
+        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+        <li class="page-item"><a class="page-link" href="#">2</a></li>
+        <li class="page-item"><a class="page-link" href="#">3</a></li>
+        <li class="page-item">
+            <a class="page-link" href="#">Suivant</a>
+        </li>
+    </ul>
+</nav>
+
+{% else %}
+<div class="card shadow-sm">
+    <div class="card-body empty-state">
+        <div class="empty-state-icon">
+            <i class="bi bi-receipt"></i>
+        </div>
+        <h3 class="mb-3">Aucun ticket trouvé</h3>
+        <p class="text-muted mb-4">Vous n'avez pas encore de tickets associés à votre compte.</p>
+        <a href="{{ url_for('index') }}" class="btn btn-primary">
+            <i class="bi bi-camera me-2"></i>Scanner un ticket
+        </a>
+    </div>
+</div>
+{% endif %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Gestion du changement de vue (liste/grille)
+        const toggleViewBtn = document.getElementById('toggleViewBtn');
+        const listView = document.getElementById('listView');
+        const gridView = document.getElementById('gridView');
+        
+        if (toggleViewBtn && listView && gridView) {
+            toggleViewBtn.addEventListener('click', function() {
+                if (listView.style.display === 'none') {
+                    listView.style.display = 'block';
+                    gridView.style.display = 'none';
+                    toggleViewBtn.innerHTML = '<i class="bi bi-grid me-1"></i>Changer de vue';
+                } else {
+                    listView.style.display = 'none';
+                    gridView.style.display = 'block';
+                    toggleViewBtn.innerHTML = '<i class="bi bi-list me-1"></i>Changer de vue';
+                }
+            });
+        }
+        
+        // Animation des cartes de statistiques
+        const statCards = document.querySelectorAll('.stat-card');
+        
+        // Ajouter une animation légère lors du survol
+        statCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-10px)';
+                this.style.boxShadow = '0 10px 20px rgba(0,0,0,0.15)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(-5px)';
+                this.style.boxShadow = '0 8px 16px rgba(0,0,0,0.1)';
+            });
+        });
+        
+        // Appliquer les filtres lorsqu'ils changent
+        const filterSelects = document.querySelectorAll('select[name="date_filter"], select[name="store_filter"], select[name="sort_order"]');
+        
+        filterSelects.forEach(select => {
+            select.addEventListener('change', function() {
+                this.form.submit();
+            });
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,489 @@
+{% extends "base.html" %}
+
+{% block title %}Détails de Transaction{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background-color: var(--emerald-800);
+        color: white;
+        padding: 1.5rem 0;
+        margin-bottom: 2rem;
+        border-radius: 10px;
+    }
+    
+    .info-card {
+        height: 100%;
+        border-left: 4px solid var(--emerald-500);
+        transition: all 0.3s ease;
+    }
+    
+    .info-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    .info-label {
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+    
+    .info-value {
+        font-weight: 500;
+    }
+    
+    .card-header-custom {
+        background-color: var(--emerald-700);
+        color: white;
+        padding: 1rem 1.5rem;
+    }
+    
+    .badge-level {
+        font-size: 0.75rem;
+        padding: 0.35em 0.65em;
+        border-radius: 30px;
+    }
+    
+    .badge-bronze {
+        background-color: #cd7f32;
+        color: white;
+    }
+    
+    .badge-argent {
+        background-color: #c0c0c0;
+        color: #333;
+    }
+    
+    .badge-or {
+        background-color: #ffd700;
+        color: #333;
+    }
+    
+    .badge-platine {
+        background-color: #e5e4e2;
+        color: #333;
+    }
+    
+    .product-item {
+        transition: all 0.2s ease;
+    }
+    
+    .product-item:hover {
+        background-color: rgba(16, 185, 171, 0.05);
+    }
+    
+    .points-badge-success {
+        background-color: #28a745;
+        color: white;
+    }
+    
+    .points-badge-danger {
+        background-color: #dc3545;
+        color: white;
+    }
+    
+    .receipt-scan-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: rgba(255, 255, 255, 0.8);
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .receipt-scan-btn:hover {
+        background-color: white;
+        transform: scale(1.1);
+    }
+    
+    .modal-content {
+        border-radius: 12px;
+        border: none;
+    }
+    
+    .modal-header {
+        background-color: var(--emerald-700);
+        color: white;
+        border-radius: 12px 12px 0 0;
+    }
+    
+    .modal-footer {
+        border-top: 1px solid var(--emerald-100);
+    }
+    
+    .stat-card {
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        border: none;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+    
+    .stat-icon {
+        font-size: 2.5rem;
+        color: var(--emerald-600);
+        margin-bottom: 1rem;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-bottom: 0;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    @media (max-width: 767.98px) {
+        .action-buttons {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header shadow-sm">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">
+                <i class="bi bi-receipt me-2"></i>Transaction #{{ transaction.transaction_id }}
+            </h2>
+            <a href="{{ url_for('my_receipts') }}" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-arrow-left me-2"></i>Retour
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Informations générales -->
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100 info-card">
+            <div class="card-header-custom">
+                <h5 class="mb-0">
+            <i class="bi bi-graph-up me-2"></i>Statistiques et informations supplémentaires
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card stat-card h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="stat-icon">
+                            <i class="bi bi-receipt-cutoff"></i>
+                        </div>
+                        <div class="stat-value">{{ transaction.transaction_id }}</div>
+                        <p class="stat-label">Numéro de transaction</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card stat-card h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="stat-icon">
+                            <i class="bi bi-award"></i>
+                        </div>
+                        <div class="stat-value">{{ transaction.points_gagnes }}</div>
+                        <p class="stat-label">Points gagnés</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card stat-card h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="stat-icon">
+                            <i class="bi bi-basket"></i>
+                        </div>
+                        <div class="stat-value">{{ transaction.details|length if transaction.details else 0 }}</div>
+                        <p class="stat-label">Articles achetés</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% if transaction.client_nom %}
+        <div class="alert alert-info mt-4">
+            <div class="d-flex">
+                <div class="flex-shrink-0">
+                    <i class="bi bi-info-circle fs-4"></i>
+                </div>
+                <div class="ms-3">
+                    <h5 class="mb-1">Information client</h5>
+                    <p class="mb-0">Cette transaction est associée au compte client <strong>{{ transaction.client_prenom }} {{ transaction.client_nom }}</strong>.</p>
+                    <p class="mb-0">Les points de fidélité ont été automatiquement crédités sur sa carte.</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Actions -->
+<div class="d-flex justify-content-end mt-4 mb-4 action-buttons">
+    <a href="{{ url_for('my_receipts') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-receipt me-2"></i>Voir tous mes tickets
+    </a>
+    
+    {% if receipt_image_url %}
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#scanModal">
+        <i class="bi bi-file-earmark-image me-2"></i>Voir le ticket de caisse
+    </button>
+    {% else %}
+    <a href="{{ url_for('index') }}" class="btn btn-primary">
+        <i class="bi bi-camera me-2"></i>Scanner un ticket
+    </a>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animation des cartes de statistiques
+        const statCards = document.querySelectorAll('.stat-card');
+        
+        // Ajouter une animation légère lors du survol
+        statCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-10px)';
+                this.style.boxShadow = '0 10px 20px rgba(0,0,0,0.15)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(-5px)';
+                this.style.boxShadow = '0 8px 16px rgba(0,0,0,0.1)';
+            });
+        });
+    });
+</script>
+{% endblock %}        <i class="bi bi-info-circle me-2"></i>Informations générales
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="info-label">Date</div>
+                        <div class="info-value">{{ transaction.date_transaction }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-label">Magasin</div>
+                        <div class="info-value">{{ transaction.magasin_nom or 'Inconnu' }}</div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="info-label">Client</div>
+                        <div class="info-value">
+                            {% if transaction.client_nom %}
+                                {{ transaction.client_prenom }} {{ transaction.client_nom }}
+                            {% else %}
+                                Anonyme
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-label">Niveau de fidélité</div>
+                        <div class="info-value">
+                            {% if transaction.niveau_fidelite %}
+                                <span class="badge badge-level badge-{{ transaction.niveau_fidelite }}">
+                                    {{ transaction.niveau_fidelite|capitalize }}
+                                </span>
+                            {% else %}
+                                Non défini
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="info-label">Carte de fidélité</div>
+                        <div class="info-value">{{ transaction.numero_carte or 'Non spécifiée' }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-label">Points obtenus</div>
+                        <div class="info-value">
+                            <span class="badge points-badge-success">+{{ transaction.points_gagnes }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if transaction.points_utilises and transaction.points_utilises > 0 %}
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="info-label">Points utilisés</div>
+                        <div class="info-value">
+                            <span class="badge points-badge-danger">-{{ transaction.points_utilises }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="alert alert-success mt-4">
+                    <div class="d-flex">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-cash-coin fs-4"></i>
+                        </div>
+                        <div class="ms-3">
+                            <h5 class="mb-1">Montant total</h5>
+                            <div class="fs-4 fw-bold">{{ "%.2f"|format(transaction.montant_total|float) }} €</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Articles achetés -->
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100 info-card">
+            <div class="card-header-custom">
+                <h5 class="mb-0">
+                    <i class="bi bi-cart me-2"></i>Articles achetés
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                {% if transaction.details %}
+                <div class="table-responsive">
+                    <table class="table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Article</th>
+                                <th class="text-center">Qté</th>
+                                <th class="text-end">Prix</th>
+                                <th class="text-end">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in transaction.details %}
+                            <tr class="product-item">
+                                <td>{{ item.produit_nom }}</td>
+                                <td class="text-center">{{ item.quantite }}</td>
+                                <td class="text-end">{{ "%.2f"|format(item.prix_unitaire|float) }} €</td>
+                                <td class="text-end">{{ "%.2f"|format(item.montant_ligne|float) }} €</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-light">
+                                <th colspan="3" class="text-end">Total:</th>
+                                <th class="text-end">{{ "%.2f"|format(transaction.montant_total|float) }} €</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-warning m-3">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Aucun détail d'article disponible pour cette transaction.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scan du ticket -->
+<div class="card shadow-sm mt-4">
+    <div class="card-header-custom d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            <i class="bi bi-file-earmark-text me-2"></i>Scan du ticket de caisse
+        </h5>
+        <button type="button" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#scanModal">
+            <i class="bi bi-search me-2"></i>Voir en grand
+        </button>
+    </div>
+    <div class="card-body">
+        <div class="row align-items-center">
+            {% if receipt_image_url %}
+            <div class="col-md-6 position-relative">
+                <img src="{{ receipt_image_url }}" class="img-fluid rounded shadow-sm" alt="Scan du ticket">
+                <button type="button" class="receipt-scan-btn" data-bs-toggle="modal" data-bs-target="#scanModal">
+                    <i class="bi bi-zoom-in"></i>
+                </button>
+            </div>
+            <div class="col-md-6">
+                <h5 class="mb-3">Informations du ticket</h5>
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Date du ticket</dt>
+                    <dd class="col-sm-8">{{ receipt_date or transaction.date_transaction }}</dd>
+                    
+                    <dt class="col-sm-4">Magasin</dt>
+                    <dd class="col-sm-8">{{ receipt_vendor or transaction.magasin_nom }}</dd>
+                    
+                    <dt class="col-sm-4">Total</dt>
+                    <dd class="col-sm-8">{{ "%.2f"|format(transaction.montant_total|float) }} €</dd>
+                    
+                    <dt class="col-sm-4">Mode de paiement</dt>
+                    <dd class="col-sm-8">{{ receipt_payment_method or 'Non spécifié' }}</dd>
+                </dl>
+            </div>
+            {% else %}
+            <div class="col-12 text-center py-5">
+                <div class="mb-3">
+                    <i class="bi bi-file-earmark-x text-muted" style="font-size: 3rem;"></i>
+                </div>
+                <h5 class="mb-3">Aucun scan disponible</h5>
+                <p class="text-muted mb-4">Le scan du ticket de caisse n'est pas disponible pour cette transaction.</p>
+                <a href="{{ url_for('index') }}" class="btn btn-primary">
+                    <i class="bi bi-camera me-2"></i>Scanner un ticket
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour afficher le scan en grand -->
+<div class="modal fade" id="scanModal" tabindex="-1" aria-labelledby="scanModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="scanModalLabel">Scan du ticket de caisse</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                {% if receipt_image_url %}
+                <img src="{{ receipt_image_url }}" class="img-fluid w-100" alt="Scan du ticket">
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-file-earmark-x text-muted" style="font-size: 4rem;"></i>
+                    <p class="mt-3">Aucune image disponible</p>
+                </div>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistiques et informations supplémentaires -->
+<div class="card shadow-sm mt-4">
+    <div class="card-header-custom">
+        <h5 class="mb-0">

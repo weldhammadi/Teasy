@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Transactions{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h1 class="mb-4">Transactions de Fidélité</h1>
+    
+    {% if transactions %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Date</th>
+                            <th>Client</th>
+                            <th>Magasin</th>
+                            <th>Montant</th>
+                            <th>Points</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in transactions %}
+                        <tr>
+                            <td>{{ transaction.transaction_id }}</td>
+                            <td>{{ transaction.date_transaction }}</td>
+                            <td>
+                                {% if transaction.client_nom %}
+                                    <a href="{{ url_for('client_detail', client_id=transaction.client_id) }}">
+                                        {{ transaction.client_prenom }} {{ transaction.client_nom }}
+                                    </a>
+                                {% else %}
+                                    Anonyme
+                                {% endif %}
+                            </td>
+                            <td>{{ transaction.magasin_nom or 'Inconnu' }}</td>
+                            <td class="text-end">{{ "%.2f"|format(transaction.montant_total|float) }} €</td>
+                            <td class="text-end">{{ transaction.points_gagnes }}</td>
+                            <td>
+                                <a href="{{ url_for('transaction_detail', transaction_id=transaction.transaction_id) }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-eye"></i> Détails
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <h4 class="alert-heading">Aucune transaction</h4>
+        <p>Aucune transaction n'a encore été enregistrée dans la base de données de fidélité.</p>
+    </div>
+    {% endif %}
+    
+    <div class="mt-4">
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Retour à l'accueil
+        </a>
+    </div>
+</div>
+{% endblock %}

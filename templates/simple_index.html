@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt Processor (Minimal)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 15px;
+            background: #4285F4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background: #3367D6;
+        }
+        #result {
+            margin-top: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: none;
+        }
+        .success {
+            color: #28a745;
+        }
+        .error {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <h1>Minimal Receipt Processor</h1>
+    
+    <form id="uploadForm" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="file">Select Receipt Image:</label>
+            <input type="file" id="file" name="file" accept="image/*" required>
+        </div>
+        
+        <button type="submit" class="btn">Upload Receipt</button>
+    </form>
+    
+    <div id="result"></div>
+    
+    <div>
+        <p><a href="/receipts">View All Receipts</a></p>
+    </div>
+    
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            const fileInput = document.getElementById('file');
+            formData.append('file', fileInput.files[0]);
+            
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                const resultDiv = document.getElementById('result');
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <h3 class="success">Receipt Processed Successfully!</h3>
+                        <p>${data.message}</p>
+                        <p>Receipt ID: ${data.receipt_id}</p>
+                        <p><a href="${data.redirect}">View Receipt Details</a></p>
+                    `;
+                    
+                    // Optional: Redirect after a short delay
+                    setTimeout(() => {
+                        window.location.href = data.redirect;
+                    }, 2000);
+                } else {
+                    resultDiv.innerHTML = `
+                        <h3 class="error">Error!</h3>
+                        <p>${data.error || 'Unknown error occurred'}</p>
+                    `;
+                }
+                
+                resultDiv.style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('result').innerHTML = `
+                    <h3 class="error">Error!</h3>
+                    <p>Failed to process receipt: ${error.message}</p>
+                `;
+                document.getElementById('result').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html> 

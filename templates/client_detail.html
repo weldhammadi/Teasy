@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+
+{% block title %}Détails du Client{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Fiche Client: {{ client.prenom }} {{ client.nom }}</h1>
+        <a href="{{ url_for('clients_list') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Retour aux clients
+        </a>
+    </div>
+</div>
+{% endblock %}
+    
+    <div class="row">
+        <!-- Informations du client -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="m-0"><i class="fas fa-user me-2"></i>Informations personnelles</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3 text-center">
+                        <div class="bg-light rounded-circle d-inline-flex justify-content-center align-items-center" style="width: 100px; height: 100px;">
+                            <i class="fas fa-user fa-3x text-muted"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-borderless">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 40%;">Nom</th>
+                                    <td>{{ client.prenom }} {{ client.nom }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Email</th>
+                                    <td>{{ client.email }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Téléphone</th>
+                                    <td>{{ client.telephone or 'Non renseigné' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Adresse</th>
+                                    <td>{{ client.adresse or 'Non renseignée' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Ville</th>
+                                    <td>{{ client.code_postal }} {{ client.ville }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Inscription</th>
+                                    <td>{{ client.date_inscription }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Informations de fidélité -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="m-0"><i class="fas fa-award me-2"></i>Fidélité</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4 text-center">
+                        <div class="mb-2">
+                            <span class="badge fs-6 p-2
+                                {% if client.niveau_fidelite == 'bronze' %}bg-secondary
+                                {% elif client.niveau_fidelite == 'argent' %}bg-light text-dark
+                                {% elif client.niveau_fidelite == 'or' %}bg-warning text-dark
+                                {% elif client.niveau_fidelite == 'platine' %}bg-info
+                                {% else %}bg-secondary{% endif %}">
+                                Niveau {{ client.niveau_fidelite|capitalize }}
+                            </span>
+                        </div>
+                        <div class="h1 mb-0">{{ client.points_actuels }}</div>
+                        <div class="text-muted">points disponibles</div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-borderless">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 40%;">N° Carte</th>
+                                    <td>{{ client.numero_carte or 'Non renseigné' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Expiration</th>
+                                    <td>{{ client.date_expiration or 'N/A' }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <hr>
+                    
+                    <h6 class="fw-bold mb-3">Historique des points</h6>
+                    {% if client.points_history %}
+                    <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
+                        <table class="table table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th class="text-end">Points</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in client.points_history %}
+                                <tr>
+                                    <td>{{ entry.date_operation.split(' ')[0] }}</td>
+                                    <td>{{ entry.type_operation }}</td>
+                                    <td class="text-end
+                                        {% if 'gain' in entry.type_operation %}text-success
+                                        {% elif 'utilisation' in entry.type_operation or 'expiration' in entry.type_operation %}text-danger
+                                        {% else %}{% endif %}">
+                                        {% if 'gain' in entry.type_operation %}+{% endif %}
+                                        {% if 'utilisation' in entry.type_operation or 'expiration' in entry.type_operation %}-{% endif %}
+                                        {{ entry.points }}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">Aucun historique de points disponible.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Statistiques -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="m-0"><i class="fas fa-chart-bar me-2"></i>Statistiques</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3 mb-4">
+                        <div class="col-6">
+                            <div class="card bg-light h-100">
+                                <div class="card-body p-3 text-center">
+                                    <div class="h3 mb-0">{{ transactions|length }}</div>
+                                    <div class="text-muted small">transactions</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card bg-light h-100">
+                                <div class="card-body p-3 text-center">
+                                    <div class="h3 mb-0">{{ "%.2f"|format(transactions|sum(attribute='montant_total')|default(0)|float) }}</div>
+                                    <div class="text-muted small">euros dépensés</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h6 class="fw-bold mb-3">Dernières transactions</h6>
+                    {% if transactions %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Magasin</th>
+                                    <th class="text-end">Montant</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for transaction in transactions %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ url_for('transaction_detail', transaction_id=transaction.transaction_id) }}">
+                                            {{ transaction.date_transaction.split(' ')[0] }}
+                                        </a>
+                                    </td>
+                                    <td>{{ transaction.magasin_nom|default('Inconnu', true) }}</td>
+                                    <td class="text-end">{{ "%.2f"|format(transaction.montant_total|float) }} €</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">Aucune transaction récente.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Transactions -->
+    <div class="row mt-2">
+        <div class="col-12">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="m-0"><i class="fas fa-receipt me-2"></i>Toutes les transactions</h5>
+                </div>
+                <div class="card-body">
+                    {% if transactions %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Date</th>
+                                    <th>Magasin</th>
+                                    <th class="text-end">Montant</th>
+                                    <th class="text-center">Points</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for transaction in transactions %}
+                                <tr>
+                                    <td>{{ transaction.transaction_id }}</td>
+                                    <td>{{ transaction.date_transaction }}</td>
+                                    <td>{{ transaction.magasin_nom|default('Inconnu', true) }}</td>
+                                    <td class="text-end">{{ "%.2f"|format(transaction.montant_total|float) }} €</td>
+                                    <td class="text-center">
+                                        <span class="badge bg-success">+{{ transaction.points_gagnes }}</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="{{ url_for('transaction_detail', transaction_id=transaction.transaction_id) }}" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-eye"></i> Détails
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <h4 class="alert-heading">Aucune transaction</h4>
+                        <p>Ce client n'a pas encore effectué de transaction.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>

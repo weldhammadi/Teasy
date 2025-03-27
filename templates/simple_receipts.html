@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Receipts</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .btn {
+            display: inline-block;
+            padding: 5px 10px;
+            background: #4285F4;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        .btn:hover {
+            background: #3367D6;
+        }
+        .empty {
+            text-align: center;
+            margin: 30px 0;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <h1>All Receipts</h1>
+    
+    {% if receipts %}
+    <table>
+        <thead>
+            <tr>
+                <th>Receipt ID</th>
+                <th>Vendor</th>
+                <th>Date</th>
+                <th>Total</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for receipt in receipts %}
+            <tr>
+                <td>{{ receipt.receipt_id }}</td>
+                <td>{{ receipt.vendor }}</td>
+                <td>{{ receipt.date }}</td>
+                <td>${{ receipt.total }}</td>
+                <td><a href="/receipt/{{ receipt.receipt_id }}" class="btn">View</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty">
+        <p>No receipts found. <a href="/">Upload a receipt</a> to get started.</p>
+    </div>
+    {% endif %}
+    
+    <p><a href="/">Back to Upload</a></p>
+</body>
+</html> 

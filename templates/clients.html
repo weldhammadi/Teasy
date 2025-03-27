@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Clients{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h1 class="mb-4">Clients du Programme de Fidélité</h1>
+    
+    {% if clients %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nom</th>
+                            <th>Email</th>
+                            <th>Niveau</th>
+                            <th>Points</th>
+                            <th>Inscription</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for client in clients %}
+                        <tr>
+                            <td>{{ client.client_id }}</td>
+                            <td>{{ client.prenom }} {{ client.nom }}</td>
+                            <td>{{ client.email }}</td>
+                            <td>
+                                {% if client.niveau_fidelite %}
+                                    <span class="badge 
+                                        {% if client.niveau_fidelite == 'bronze' %}bg-secondary
+                                        {% elif client.niveau_fidelite == 'argent' %}bg-light text-dark
+                                        {% elif client.niveau_fidelite == 'or' %}bg-warning text-dark
+                                        {% else %}bg-info{% endif %}">
+                                        {{ client.niveau_fidelite|capitalize }}
+                                    </span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td class="text-end">{{ client.points_actuels }}</td>
+                            <td>{{ client.date_inscription }}</td>
+                            <td>
+                                <a href="{{ url_for('client_detail', client_id=client.client_id) }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-eye"></i> Détails
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <h4 class="alert-heading">Aucun client</h4>
+        <p>Aucun client n'a encore été enregistré dans la base de données de fidélité.</p>
+    </div>
+    {% endif %}
+    
+    <div class="mt-4">
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Retour à l'accueil
+        </a>
+    </div>
+</div>
+{% endblock %}

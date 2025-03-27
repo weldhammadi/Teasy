@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="card border-0 shadow">
+        <div class="card-header bg-primary text-white">
+            <h1 class="h3 mb-0">
+                <i class="fas fa-cloud me-2"></i>Storage Configuration
+            </h1>
+        </div>
+        
+        <div class="card-body p-4">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="alert {% if status.status.using_gcp %}alert-success{% else %}alert-warning{% endif %}">
+                        <h4 class="alert-heading">
+                            {% if status.status.using_gcp %}
+                                <i class="fas fa-check-circle me-2"></i>Google Cloud Storage Active
+                            {% else %}
+                                <i class="fas fa-exclamation-triangle me-2"></i>Local Storage Fallback Active
+                            {% endif %}
+                        </h4>
+                        <p>Current storage mode: <strong>{{ status.status.storage_type }}</strong></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Storage Configuration</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>Bucket Name</span>
+                                    <span class="badge bg-primary">{{ status.status.bucket_name }}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>Using GCP</span>
+                                    <span class="badge {% if status.status.using_gcp %}bg-success{% else %}bg-warning{% endif %}">
+                                        {{ status.status.using_gcp }}
+                                    </span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>Fallback Enabled</span>
+                                    <span class="badge {% if status.status.fallback_enabled %}bg-info{% else %}bg-secondary{% endif %}">
+                                        {{ status.status.fallback_enabled }}
+                                    </span>
+                                </li>
+                                {% if not status.status.using_gcp %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>Local Storage Path</span>
+                                    <span class="text-muted small">{{ status.status.local_base_path }}</span>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">App Configuration</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>GCP Bucket Name</span>
+                                    <span class="badge bg-primary">{{ status.app_config.GCP_BUCKET_NAME }}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>Credentials Path</span>
+                                    <span class="text-muted small">{{ status.app_config.GCP_CREDENTIALS_PATH }}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>Local Fallback Allowed</span>
+                                    <span class="badge {% if status.app_config.USE_LOCAL_FALLBACK %}bg-info{% else %}bg-secondary{% endif %}">
+                                        {{ status.app_config.USE_LOCAL_FALLBACK }}
+                                    </span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Storage Statistics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h1 class="display-4">{{ status.receipt_count }}</h1>
+                                        <p class="mb-0">Total Receipts Stored</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4 text-center">
+                <a href="{{ url_for('index') }}" class="btn btn-primary">
+                    <i class="fas fa-home me-2"></i>Return to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

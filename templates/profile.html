@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block title %}Mon Profil{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-header {
+        background-color: var(--emerald-800);
+        color: rgb(42, 194, 156);
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        border-radius: 10px;
+    }
+    
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+        background-color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .profile-avatar i {
+        font-size: 3rem;
+        color: var(--emerald-700);
+    }
+    
+    .info-label {
+        color: #6c757d;
+        font-size: 0.875rem;
+    }
+    
+    .info-value {
+        font-weight: 500;
+    }
+    
+    .card-header-custom {
+        background-color: var(--emerald-700);
+        color: rgb(0, 0, 0);
+        padding: 1rem 1.5rem;
+    }
+    
+    .loyalty-card {
+        background: linear-gradient(135deg, var(--emerald-700) 0%, var(--emerald-500) 100%);
+        color: rgb(0, 0, 0);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(10, 120, 134, 0.2);
+    }
+    
+    .loyalty-card-header {
+        padding: 1.5rem;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .loyalty-card-body {
+        padding: 1.5rem;
+    }
+    
+    .loyalty-points {
+        font-size: 3.5rem;
+        font-weight: 700;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .badge-level {
+        background-color: white;
+        color: var(--emerald-700);
+        padding: 0.5rem 1rem;
+        border-radius: 30px;
+        font-weight: 600;
+    }
+    
+    .activity-item {
+        transition: all 0.2s ease;
+        border-left: 0 solid var(--emerald-500);
+        padding-left: 0;
+    }
+    
+    .activity-item:hover {
+        border-left: 4px solid var(--emerald-500);
+        padding-left: 0.5rem;
+        background-color: rgba(16, 185, 171, 0.05);
+    }
+    
+    .points-badge-success {
+        background-color: #28a745;
+    }
+    
+    .points-badge-danger {
+        background-color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-header shadow-sm">
+    <div class="container text-center">
+        <div class="profile-avatar">
+            <i class="bi bi-person"></i>
+        </div>
+        <h2 class="mb-1">{{ client.prenom }} {{ client.nom }}</h2>
+        <p class="mb-0 text-white-50">{{ client.email }}</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Informations personnelles -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header-custom">
+                <h5 class="mb-0">
+                    <i class="bi bi-person-vcard me-2"></i>Informations personnelles
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="vstack gap-3">
+                    <div>
+                        <div class="info-label">Nom complet</div>
+                        <div class="info-value">{{ client.nom }} {{ client.prenom }}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">Email</div>
+                        <div class="info-value">{{ client.email }}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">Téléphone</div>
+                        <div class="info-value">{{ client.telephone or 'Non renseigné' }}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">Adresse</div>
+                        <div class="info-value">{{ client.adresse or 'Non renseignée' }}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">Code postal</div>
+                        <div class="info-value">{{ client.code_postal or 'Non renseigné' }}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">Ville</div>
+                        <div class="info-value">{{ client.ville or 'Non renseignée' }}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">Date d'inscription</div>
+                        <div class="info-value">{{ client.date_inscription }}</div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 text-center">
+                    <button type="button" class="btn btn-outline-primary" disabled>
+                        <i class="bi bi-pencil me-2"></i>Modifier
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Carte de fidélité -->
+    <div class="col-lg-8">
+        <div class="loyalty-card mb-4">
+            <div class="loyalty-card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-1">Carte de fidélité</h5>
+                        <div>{{ client.numero_carte }}</div>
+                    </div>
+                    <span class="badge-level">{{ client.niveau_fidelite|capitalize }}</span>
+                </div>
+            </div>
+            <div class="loyalty-card-body text-center">
+                <div class="loyalty-points mb-2">{{ client.points_actuels }}</div>
+                <p class="mb-0">points disponibles</p>
+                <div class="mt-2 text-white-50 small">
+                    Date d'expiration: {{ client.date_expiration or 'Non définie' }}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Historique des points -->
+        <div class="card shadow-sm">
+            <div class="card-header-custom">
+                <h5 class="mb-0">
+                    <i class="bi bi-clock-history me-2"></i>Historique des points
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if points_history %}
+                <div style="max-height: 300px; overflow-y: auto;">
+                    <div class="vstack gap-2">
+                        {% for item in points_history %}
+                        <div class="activity-item p-2 rounded">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <div class="d-flex align-items-center">
+                                        {% if item.type_operation == 'gain' %}
+                                        <span class="badge points-badge-success me-2">+{{ item.points }}</span>
+                                        {% else %}
+                                        <span class="badge points-badge-danger me-2">-{{ item.points }}</span>
+                                        {% endif %}
+                                        <span>{{ item.description }}</span>
+                                    </div>
+                                    <div class="text-muted small">Solde: {{ item.solde_apres }} points</div>
+                                </div>
+                                <div class="text-muted small">{{ item.date_operation }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Aucun historique de points disponible.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Transactions récentes -->
+<div class="card shadow-sm mt-4">
+    <div class="card-header-custom d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            <i class="bi bi-receipt me-2"></i>Mes tickets récents
+        </h5>
+        <a href="{{ url_for('my_receipts') }}" class="btn btn-sm btn-light">
+            Voir tous mes tickets
+        </a>
+    </div>
+    <div class="card-body p-0">
+        {% if transactions %}
+        <div class="list-group list-group-flush">
+            {% for transaction in transactions %}
+            <a href="{{ url_for('transaction_detail', transaction_id=transaction.transaction_id) }}" class="list-group-item list-group-item-action">
+                <div class="d-flex w-100 justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-1">{{ transaction.magasin_nom|default('Magasin inconnu', true) }}</h6>
+                        <div class="text-muted small">{{ transaction.date_transaction }}</div>
+                    </div>
+                    <div class="text-end">
+                        <div class="text-success fw-bold">{{ "%.2f"|format(transaction.montant_total|float) }} €</div>
+                        <span class="badge bg-success">+{{ transaction.points_gagnes }} points</span>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="p-4 text-center">
+            <div class="mb-3">
+                <i class="bi bi-receipt text-muted" style="font-size: 3rem;"></i>
+            </div>
+            <p class="text-muted mb-3">Vous n'avez pas encore de transactions.</p>
+            <a href="{{ url_for('index') }}" class="btn btn-primary">
+                <i class="bi bi-camera me-2"></i>Scanner un ticket
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

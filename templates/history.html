@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}History{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">Receipt History</h2>
+        
+        {% if receipts %}
+        <div class="row">
+            {% for receipt in receipts %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card receipt-card h-100" onclick="window.location.href='/receipt/{{ receipt.receipt_id }}'">
+                    <div class="card-body">
+                        <h5 class="card-title text-truncate">
+                            {% if receipt.vendor %}
+                                {{ receipt.vendor }}
+                            {% else %}
+                                Unknown Vendor
+                            {% endif %}
+                        </h5>
+                        <div class="card-text">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Date:</span>
+                                <span>{{ receipt.date or 'N/A' }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Total:</span>
+                                <span class="text-success fw-bold">${{ "%.2f"|format(receipt.total|float) }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted">Category:</span>
+                                <span class="badge bg-primary">{{ receipt.category or 'Uncategorized' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer text-center">
+                        <small class="text-muted">Click to view details</small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            <h4 class="alert-heading">No Receipts Found</h4>
+            <p class="mb-0">Start by uploading or scanning a receipt from the home page.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

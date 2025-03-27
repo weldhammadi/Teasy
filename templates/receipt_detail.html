@@ -1,0 +1,345 @@
+{% extends "base.html" %}
+
+{% block title %}Receipt Details{% endblock %}
+
+{% block content %}
+<div class="container-lg my-5">
+    <div class="card border-0 shadow-lg">
+        <div class="card-header bg-primary text-white py-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-receipt me-2"></i>{{ receipt.vendor|default("Unknown Vendor", true) }}
+                </h1>
+                <a href="{{ url_for('history') }}" class="btn btn-light btn-sm">
+                    <i class="fas fa-arrow-left me-2"></i>Back to History
+                </a>
+            </div>
+        </div>
+
+        <div class="card-body p-4">
+            <div class="row g-4">
+                <!-- Image Section -->
+                <div class="col-lg-6">
+                    <div class="ratio ratio-1x1 bg-light rounded-3 overflow-hidden">
+                        {% if image_url %}
+                        <img src="{{ image_url }}" 
+                             class="img-fluid object-fit-cover"
+                             alt="Receipt scan">
+                        {% elif image_path %}
+                        <img src="{{ url_for('data_images', filename=image_path) }}" 
+                             class="img-fluid object-fit-cover"
+                             alt="Receipt scan">
+                        {% else %}
+                        <div class="d-flex align-items-center justify-content-center text-muted">
+                            <i class="fas fa-image fa-4x"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Information Section -->
+                <div class="col-lg-6">
+                    <div class="vstack gap-3">
+                        <!-- Summary Cards -->
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="card h-100 border-primary">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-primary">
+                                            <i class="fas fa-calendar-day me-2"></i>Date
+                                        </h5>
+                                        <p class="card-text fs-5">
+                                            {{ receipt.date|default("N/A", true) }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="card h-100 border-success">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-success">
+                                            <i class="fas fa-coins me-2"></i>Total
+                                        </h5>
+                                        <p class="card-text fs-5">
+                                            ${{ "%.2f"|format(receipt.total|float) }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Loyalty Info Section (New) -->
+                        {% if loyalty_transaction %}
+                        <div class="card border-primary">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-award me-2"></i>Programme de Fidélité
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Client:</strong> {{ loyalty_transaction.client_prenom }} {{ loyalty_transaction.client_nom }}</p>
+                                        <p class="mb-1"><strong>Carte:</strong> {{ loyalty_transaction.numero_carte }}</p>
+                                        <p class="mb-1"><strong>Niveau:</strong> 
+                                            <span class="badge 
+                                                {% if loyalty_transaction.niveau_fidelite == 'bronze' %}bg-secondary
+                                                {% elif loyalty_transaction.niveau_fidelite == 'argent' %}bg-light text-dark
+                                                {% elif loyalty_transaction.niveau_fidelite == 'or' %}bg-warning text-dark
+                                                {% else %}bg-info{% endif %}">
+                                                {{ loyalty_transaction.niveau_fidelite|capitalize }}
+                                            </span>
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Transaction ID:</strong> {{ loyalty_transaction.transaction_id }}</p>
+                                        <p class="mb-1"><strong>Points gagnés:</strong> <span class="badge bg-success">+{{ loyalty_transaction.points_gagnes }}</span></p>
+                                        <p class="mb-1">
+                                            <a href="{{ url_for('transaction_detail', transaction_id=loyalty_transaction.transaction_id) }}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-info-circle"></i> Détails fidélité
+                                            </a>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Articles List -->
+                        <div class="card border-secondary">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-list-ul me-2"></i>Purchased Items
+                                </h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="list-group list-group-flush">
+                                    {% for item in receipt.line_items %}
+                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">{{ item.get('description', 'Unspecified item') }}</h6>
+                                            <small class="text-muted">
+                                                {{ item.get('quantity', 1) }} x 
+                                                ${{ "%.2f"|format(item.get('price', 0)|float) }}
+                                            </small>
+                                        </div>
+                                        <span class="badge bg-primary rounded-pill">
+                                            ${{ "%.2f"|format((item.get('quantity', 1)|float * item.get('price', 0)|float)) }}
+                                        </span>
+                                    </div>
+                                    {% else %}
+                                    <div class="list-group-item text-muted">
+                                        No purchase details available
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- OCR Text Section -->
+                        <div class="card border-info">
+                            <div class="card-header bg-light">
+                                <ul class="nav nav-tabs card-header-tabs" id="textTabs" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active" id="cleaned-tab" data-bs-toggle="tab" data-bs-target="#cleaned" type="button" role="tab" aria-controls="cleaned" aria-selected="true">
+                                            <i class="fas fa-broom me-1"></i>Cleaned Text
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="raw-tab" data-bs-toggle="tab" data-bs-target="#raw" type="button" role="tab" aria-controls="raw" aria-selected="false">
+                                            <i class="fas fa-file-alt me-1"></i>Raw OCR
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="extra-tab" data-bs-toggle="tab" data-bs-target="#extra" type="button" role="tab" aria-controls="extra" aria-selected="false">
+                                            <i class="fas fa-info-circle me-1"></i>Additional Info
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="tab-content" id="textTabsContent">
+                                    <div class="tab-pane fade show active" id="cleaned" role="tabpanel" aria-labelledby="cleaned-tab">
+                                        <pre class="m-0 p-3 bg-light text-dark" style="max-height: 300px; overflow: auto; font-family: monospace;">
+{{ receipt.cleaned_text|default(receipt.text_brut|default("No cleaned text available", true), true) }}
+                                        </pre>
+                                    </div>
+                                    <div class="tab-pane fade" id="raw" role="tabpanel" aria-labelledby="raw-tab">
+                                        <pre class="m-0 p-3 bg-light text-dark" style="max-height: 300px; overflow: auto; font-family: monospace;">
+{{ receipt.text_brut|default("No OCR text available", true) }}
+                                        </pre>
+                                    </div>
+                                    <div class="tab-pane fade" id="extra" role="tabpanel" aria-labelledby="extra-tab">
+                                        <div class="p-3 bg-light text-dark" style="max-height: 300px; overflow: auto;">
+                                            <dl class="row mb-0">
+                                                <!-- Business Information -->
+                                                {% if receipt.siret %}
+                                                    <dt class="col-sm-4">SIRET</dt>
+                                                    <dd class="col-sm-8">{{ receipt.siret }}</dd>
+                                                {% endif %}
+                                                
+                                                {% if receipt.tva_number %}
+                                                    <dt class="col-sm-4">TVA Number</dt>
+                                                    <dd class="col-sm-8">{{ receipt.tva_number }}</dd>
+                                                {% endif %}
+                                                
+                                                {% if receipt.capital %}
+                                                    <dt class="col-sm-4">Capital</dt>
+                                                    <dd class="col-sm-8">{{ receipt.capital }}</dd>
+                                                {% endif %}
+                                                
+                                                {% if receipt.naf_code %}
+                                                    <dt class="col-sm-4">NAF Code</dt>
+                                                    <dd class="col-sm-8">{{ receipt.naf_code }}</dd>
+                                                {% endif %}
+                                                
+                                                {% if receipt.cashier %}
+                                                    <dt class="col-sm-4">Cashier</dt>
+                                                    <dd class="col-sm-8">{{ receipt.cashier }}</dd>
+                                                {% endif %}
+                                                
+                                                {% if receipt.client_type %}
+                                                    <dt class="col-sm-4">Client Type</dt>
+                                                    <dd class="col-sm-8">{{ receipt.client_type }}</dd>
+                                                {% endif %}
+                                                
+                                                <!-- Address and Contact -->
+                                                {% if receipt.store_address %}
+                                                    <dt class="col-sm-4">Store Address</dt>
+                                                    <dd class="col-sm-8">{{ receipt.store_address }}</dd>
+                                                {% endif %}
+                                                
+                                                {% if receipt.store_phone %}
+                                                    <dt class="col-sm-4">Phone</dt>
+                                                    <dd class="col-sm-8">{{ receipt.store_phone }}</dd>
+                                                {% endif %}
+                                                
+                                                {% if receipt.store_email %}
+                                                    <dt class="col-sm-4">Email</dt>
+                                                    <dd class="col-sm-8">{{ receipt.store_email }}</dd>
+                                                {% endif %}
+                                                
+                                                {% if receipt.store_website %}
+                                                    <dt class="col-sm-4">Website</dt>
+                                                    <dd class="col-sm-8">{{ receipt.store_website }}</dd>
+                                                {% endif %}
+                                                
+                                                <!-- Financial Details -->
+                                                {% if receipt.tax %}
+                                                    <dt class="col-sm-4">Tax</dt>
+                                                    <dd class="col-sm-8">${{ "%.2f"|format(receipt.tax|float) }}</dd>
+                                                {% endif %}
+                                                
+                                                {% if receipt.subtotal %}
+                                                    <dt class="col-sm-4">Subtotal</dt>
+                                                    <dd class="col-sm-8">${{ "%.2f"|format(receipt.subtotal|float) }}</dd>
+                                                {% endif %}
+                                                
+                                                <!-- Loyalty Transaction ID (New) -->
+                                                {% if receipt.loyalty_transaction_id %}
+                                                    <dt class="col-sm-4">Loyalty Transaction</dt>
+                                                    <dd class="col-sm-8">
+                                                        <a href="{{ url_for('transaction_detail', transaction_id=receipt.loyalty_transaction_id) }}">
+                                                            #{{ receipt.loyalty_transaction_id }}
+                                                        </a>
+                                                    </dd>
+                                                {% endif %}
+                                                
+                                                <!-- Storage Information -->
+                                                <dt class="col-sm-4">Storage Type</dt>
+                                                <dd class="col-sm-8">
+                                                    <span class="badge bg-info">Google Cloud Storage</span>
+                                                </dd>
+                                                
+                                                <!-- Then try to get additional info from Veryfi data -->
+                                                {% if receipt.veryfi_data %}
+                                                    {% set vdata = receipt.veryfi_data|tojson|safe|from_json %}
+                                                    
+                                                    {% if not receipt.store_address and vdata.vendor.address|default('') %}
+                                                        <dt class="col-sm-4">Merchant Address</dt>
+                                                        <dd class="col-sm-8">{{ vdata.vendor.address }}</dd>
+                                                    {% endif %}
+                                                    
+                                                    {% if not receipt.store_phone and vdata.vendor_phone|default('') %}
+                                                        <dt class="col-sm-4">Phone</dt>
+                                                        <dd class="col-sm-8">{{ vdata.vendor_phone }}</dd>
+                                                    {% endif %}
+                                                    
+                                                    {% if not receipt.store_email and vdata.vendor_email|default('') %}
+                                                        <dt class="col-sm-4">Email</dt>
+                                                        <dd class="col-sm-8">{{ vdata.vendor_email }}</dd>
+                                                    {% endif %}
+                                                    
+                                                    {% if not receipt.store_website and vdata.website|default('') %}
+                                                        <dt class="col-sm-4">Website</dt>
+                                                        <dd class="col-sm-8">{{ vdata.website }}</dd>
+                                                    {% endif %}
+                                                    
+                                                    {% if vdata.credit_card_number|default('') %}
+                                                        <dt class="col-sm-4">Card Number</dt>
+                                                        <dd class="col-sm-8">{{ vdata.credit_card_number }}</dd>
+                                                    {% endif %}
+                                                    
+                                                    {% if vdata.tip is defined and vdata.tip is not none and vdata.tip > 0 %}
+                                                        <dt class="col-sm-4">Tip</dt>
+                                                        <dd class="col-sm-8">${{ "%.2f"|format(vdata.tip|float) }}</dd>
+                                                    {% endif %}
+                                                {% endif %}
+                                                
+                                                {% if not receipt.store_address and 
+                                                     not receipt.store_phone and 
+                                                     not receipt.store_email and 
+                                                     not receipt.store_website and 
+                                                     not receipt.tax and 
+                                                     not receipt.subtotal and 
+                                                     not receipt.siret and
+                                                     not receipt.tva_number and
+                                                     not receipt.capital and
+                                                     not receipt.naf_code and
+                                                     not receipt.cashier and
+                                                     not receipt.client_type and
+                                                     not receipt.veryfi_data %}
+                                                    <p class="text-muted">No additional information available</p>
+                                                {% endif %}
+                                            </dl>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer with Additional Info -->
+        <div class="card-footer bg-light">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <dl class="mb-0">
+                        <dt class="text-muted small">Payment Method</dt>
+                        <dd class="mb-0">{{ receipt.payment_method|default("Unknown", true)|capitalize }}</dd>
+                    </dl>
+                </div>
+                <div class="col-md-4">
+                    <dl class="mb-0">
+                        <dt class="text-muted small">Category</dt>
+                        <dd class="mb-0">
+                            <span class="badge bg-primary">
+                                {{ receipt.category|default("Uncategorized", true)|capitalize }}
+                            </span>
+                        </dd>
+                    </dl>
+                </div>
+                <div class="col-md-4">
+                    <dl class="mb-0">
+                        <dt class="text-muted small">Processed At</dt>
+                        <dd class="mb-0">{{ receipt.processed_at|default("N/A", true) }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

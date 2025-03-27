@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .receipt-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .receipt-details {
+            margin-bottom: 30px;
+        }
+        .receipt-details p {
+            margin: 5px 0;
+        }
+        .line-items {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        .line-items th, .line-items td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .line-items th {
+            background-color: #f2f2f2;
+        }
+        .item-price, .item-quantity, .item-total {
+            text-align: right;
+        }
+        .receipt-total {
+            text-align: right;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-top: 20px;
+        }
+        .receipt-image {
+            margin-top: 30px;
+            text-align: center;
+        }
+        .receipt-image img {
+            max-width: 100%;
+            max-height: 500px;
+            border: 1px solid #ddd;
+        }
+        .nav-links {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Receipt Details</h1>
+    
+    <div class="receipt-header">
+        <div class="receipt-details">
+            <p><strong>Vendor:</strong> {{ receipt.vendor }}</p>
+            <p><strong>Date:</strong> {{ receipt.date }}</p>
+            <p><strong>Receipt ID:</strong> {{ receipt.receipt_id }}</p>
+        </div>
+    </div>
+    
+    {% if receipt.line_items %}
+    <h2>Items Purchased</h2>
+    <table class="line-items">
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in receipt.line_items %}
+            <tr>
+                <td>{{ item.description }}</td>
+                <td class="item-quantity">{{ item.quantity }}</td>
+                <td class="item-price">${{ item.price }}</td>
+                <td class="item-total">${{ item.total }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No line items found for this receipt.</p>
+    {% endif %}
+    
+    <div class="receipt-total">
+        <p>Total: ${{ receipt.total }}</p>
+    </div>
+    
+    {% if receipt.image_url %}
+    <div class="receipt-image">
+        <h2>Receipt Image</h2>
+        <img src="{{ receipt.image_url }}" alt="Receipt Image">
+    </div>
+    {% endif %}
+    
+    <div class="nav-links">
+        <a href="/receipts">Back to All Receipts</a> | 
+        <a href="/">Upload New Receipt</a>
+    </div>
+</body>
+</html> 

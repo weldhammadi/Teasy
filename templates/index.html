@@ -1,0 +1,408 @@
+{% extends "base.html" %}
+
+{% block title %}Scanner de Tickets{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10">
+        <div class="text-center mb-5">
+            <h1 class="display-4 mb-3">TEASY Scanner</h1>
+            <p class="lead">Numérisez vos tickets de caisse pour gérer vos dépenses et profiter de notre programme de fidélité</p>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header-custom">
+                <h2 class="mb-0 h4">
+                    <i class="bi bi-camera"></i> Scanner un ticket
+                    {% if not session.get('logged_in') %}
+                    <span class="badge bg-warning text-dark ms-2">
+                        <i class="bi bi-lock-fill me-1"></i>Connexion requise
+                    </span>
+                    {% endif %}
+                </h2>
+            </div>
+            <div class="card-body">
+                {% if not session.get('logged_in') %}
+                <div class="alert alert-info mb-4">
+                    <i class="bi bi-info-circle-fill me-2"></i> 
+                    Vous devez être connecté pour scanner et enregistrer vos tickets. 
+                    <a href="{{ url_for('login') }}" class="alert-link">Se connecter</a>
+                </div>
+                {% endif %}
+                <!-- Camera Section -->
+                <div class="camera-section">
+                    <button class="btn btn-primary w-100 mb-3" id="toggleCamera">
+                        <i class="bi bi-camera-fill me-2"></i> 
+                        {% if session.get('logged_in') %}
+                        Ouvrir l'appareil photo
+                        {% else %}
+                        Se connecter pour utiliser l'appareil photo
+                        {% endif %}
+                    </button>
+                    <div id="cameraContainer" style="display: none;">
+                        <video id="video" class="w-100 mb-2" playsinline autoplay muted></video>
+                        <button class="btn btn-success w-100" id="captureButton">
+                            <i class="bi bi-camera-fill me-2"></i> Prendre une photo
+                        </button>
+                    </div>
+                    <div id="cameraError" class="alert alert-warning mt-2" style="display: none;">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> 
+                        L'accès à la caméra n'est pas disponible. Veuillez utiliser l'option d'importation de fichier.
+                        
+                        <!-- Direct file input for devices that don't support camera API -->
+                        <div class="mt-2">
+                            <label for="directCameraInput" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-camera-fill me-2"></i> Utiliser l'appareil photo de l'appareil
+                            </label>
+                            <input type="file" id="directCameraInput" accept="image/*" capture="environment" style="display: none;">
+                        </div>
+                    </div>
+                    <canvas id="canvas" style="display: none;"></canvas>
+                </div>
+
+                <!-- Upload Section -->
+                <div class="upload-area" id="uploadArea">
+                    <form id="uploadForm" class="text-center">
+                        <div class="mb-4">
+                            <div class="drop-zone" id="dropZone">
+                                <div class="stat-icon">
+                                    <i class="bi bi-cloud-arrow-up"></i>
+                                </div>
+                                <p class="mb-3">Glissez et déposez votre image de ticket ici<br>ou</p>
+                                <button type="button" class="btn btn-primary" id="selectFile">
+                                    <i class="bi bi-file-earmark-image me-2"></i>
+                                    {% if session.get('logged_in') %}
+                                    Sélectionner un fichier
+                                    {% else %}
+                                    Se connecter pour sélectionner
+                                    {% endif %}
+                                </button>
+                                <input type="file" id="fileInput" accept="image/*" hidden>
+                            </div>
+                        </div>
+                        
+                        <!-- API Selection (hidden) -->
+                        <div class="d-none">
+                            <input type="hidden" name="processing_method" value="combined">
+                        </div>
+                        
+                        <div id="preview" class="mb-3" style="display: none;">
+                            <img id="imagePreview" class="img-fluid mb-3 shadow-sm" alt="Aperçu">
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check-lg me-2"></i> Analyser le ticket
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="loading" style="display: none;" class="text-center py-4">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                        <span class="visually-hidden">Chargement...</span>
+                    </div>
+                    <p>Analyse du ticket en cours...</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Features -->
+        <div class="row g-4 mt-4">
+            <div class="col-md-4">
+                <div class="stat-card h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="stat-icon">
+                            <i class="bi bi-archive"></i>
+                        </div>
+                        <h5 class="card-title">Stockage sécurisé</h5>
+                        <p class="card-text text-muted">
+                            Vos tickets sont stockés en toute sécurité dans le cloud pour un accès facile.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="stat-card h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="stat-icon">
+                            <i class="bi bi-award"></i>
+                        </div>
+                        <h5 class="card-title">Programme fidélité</h5>
+                        <p class="card-text text-muted">
+                            Gagnez des points à chaque achat enregistré et profitez de récompenses exclusives.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="stat-card h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="stat-icon">
+                            <i class="bi bi-graph-up"></i>
+                        </div>
+                        <h5 class="card-title">Analyse des dépenses</h5>
+                        <p class="card-text text-muted">
+                            Suivez et analysez vos habitudes d'achat grâce à nos outils de visualisation.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- User Journey Steps -->
+        <div class="card shadow-sm mt-5">
+            <div class="card-header-custom">
+                <h2 class="mb-0 h4">
+                    <i class="bi bi-signpost-split"></i> Comment ça marche
+                </h2>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <div class="stat-icon pulse-animation">
+                                <i class="bi bi-camera"></i>
+                            </div>
+                            <h5>1. Scannez</h5>
+                            <p class="text-muted">Prenez une photo de votre ticket ou importez une image existante</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <div class="stat-icon">
+                                <i class="bi bi-magic"></i>
+                            </div>
+                            <h5>2. Analysez</h5>
+                            <p class="text-muted">Notre système extrait automatiquement les informations importantes</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <div class="stat-icon">
+                                <i class="bi bi-award"></i>
+                            </div>
+                            <h5>3. Gagnez</h5>
+                            <p class="text-muted">Recevez des points de fidélité et suivez vos dépenses facilement</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Login/Signup CTA for not logged in users -->
+        {% if not session.get('logged_in') %}
+        <div class="card shadow-sm mt-4 text-center">
+            <div class="card-body py-4">
+                <h3 class="mb-3">Commencez à gagner des points dès maintenant</h3>
+                <p class="mb-4">Connectez-vous à votre compte pour associer vos tickets et profiter du programme de fidélité</p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{{ url_for('login') }}" class="btn btn-primary">
+                        <i class="bi bi-box-arrow-in-right me-2"></i> Connexion
+                    </a>
+                    <a href="{{ url_for('history') }}" class="btn btn-outline-primary">
+                        <i class="bi bi-clock-history me-2"></i> Voir l'historique
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Camera functionality
+        const toggleCameraBtn = document.getElementById('toggleCamera');
+        const cameraContainer = document.getElementById('cameraContainer');
+        const cameraError = document.getElementById('cameraError');
+        const video = document.getElementById('video');
+        const captureButton = document.getElementById('captureButton');
+        const canvas = document.getElementById('canvas');
+        const preview = document.getElementById('preview');
+        const imagePreview = document.getElementById('imagePreview');
+        
+        // File upload functionality
+        const dropZone = document.getElementById('dropZone');
+        const selectFileBtn = document.getElementById('selectFile');
+        const fileInput = document.getElementById('fileInput');
+        const uploadForm = document.getElementById('uploadForm');
+        const uploadArea = document.getElementById('uploadArea');
+        const loadingIndicator = document.getElementById('loading');
+        
+        // Camera toggle
+        toggleCameraBtn.addEventListener('click', function() {
+            {% if not session.get('logged_in') %}
+                window.location.href = "{{ url_for('login') }}";
+                return;
+            {% else %}
+                if (cameraContainer.style.display === 'none') {
+                    startCamera();
+                } else {
+                    stopCamera();
+                }
+            {% endif %}
+        });
+        
+        function startCamera() {
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                    .then(function(stream) {
+                        video.srcObject = stream;
+                        cameraContainer.style.display = 'block';
+                        cameraError.style.display = 'none';
+                        toggleCameraBtn.innerHTML = '<i class="bi bi-camera-fill me-2"></i> Fermer l\'appareil photo';
+                    })
+                    .catch(function(error) {
+                        console.error("Erreur d'accès à la caméra:", error);
+                        cameraError.style.display = 'block';
+                    });
+            } else {
+                cameraError.style.display = 'block';
+            }
+        }
+        
+        function stopCamera() {
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+            }
+            cameraContainer.style.display = 'none';
+            toggleCameraBtn.innerHTML = '<i class="bi bi-camera-fill me-2"></i> Ouvrir l\'appareil photo';
+        }
+        
+        // Capture photo
+        captureButton.addEventListener('click', function() {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Convert canvas to file
+            canvas.toBlob(function(blob) {
+                const file = new File([blob], "camera-capture.jpg", { type: "image/jpeg" });
+                displayPreview(file);
+                stopCamera();
+            }, 'image/jpeg');
+        });
+        
+        // Direct camera input for devices without camera API
+        const directCameraInput = document.getElementById('directCameraInput');
+        directCameraInput.addEventListener('change', function(e) {
+            {% if not session.get('logged_in') %}
+                window.location.href = "{{ url_for('login') }}";
+                return;
+            {% else %}
+                if (e.target.files && e.target.files[0]) {
+                    displayPreview(e.target.files[0]);
+                }
+            {% endif %}
+        });
+        
+        // File selection
+        selectFileBtn.addEventListener('click', function() {
+            {% if not session.get('logged_in') %}
+                window.location.href = "{{ url_for('login') }}";
+                return;
+            {% else %}
+                fileInput.click();
+            {% endif %}
+        });
+        
+        fileInput.addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                displayPreview(e.target.files[0]);
+            }
+        });
+        
+        // Drag and drop
+        dropZone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            dropZone.classList.add('bg-light');
+        });
+        
+        dropZone.addEventListener('dragleave', function() {
+            dropZone.classList.remove('bg-light');
+        });
+        
+        dropZone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            dropZone.classList.remove('bg-light');
+            
+            {% if not session.get('logged_in') %}
+                window.location.href = "{{ url_for('login') }}";
+                return;
+            {% else %}
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                    displayPreview(e.dataTransfer.files[0]);
+                }
+            {% endif %}
+        });
+        
+        // Display preview
+        function displayPreview(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                preview.style.display = 'block';
+                
+                // Add file to form data
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                fileInput.files = dataTransfer.files;
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        // Form submission
+        uploadForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            {% if not session.get('logged_in') %}
+                window.location.href = "{{ url_for('login') }}";
+                return;
+            {% endif %}
+            
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert('Veuillez sélectionner une image de ticket à analyser.');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('processing_method', document.querySelector('input[name="processing_method"]').value);
+            
+            // Show loading
+            uploadArea.style.display = 'none';
+            loadingIndicator.style.display = 'block';
+            
+            // Submit form to backend API
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(result => {
+                console.log('Résultat:', result);
+                if (result.success) {
+                    // Rediriger vers la page de détails du ticket
+                    window.location.href = '/receipt/' + result.receipt_id;
+                } else {
+                    throw new Error(result.error || 'Échec du traitement');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert(`Erreur de traitement: ${error.message}`);
+                // Réinitialiser l'interface
+                loadingIndicator.style.display = 'none';
+                uploadArea.style.display = 'block';
+            });
+        });
+    });
+</script>
+{% endblock %}
