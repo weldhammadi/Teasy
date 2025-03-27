@@ -1,0 +1,14 @@
+flask>=2.0.1
+werkzeug>=2.0.1
+numpy>=1.20.0
+opencv-python>=4.5.0
+pytesseract>=0.3.8
+pandas>=1.3.0
+python-dotenv>=0.19.0
+requests>=2.26.0
+veryfi>=3.0.0
+google-cloud-storage>=2.10.0
+google-cloud-firestore
+mistralai
+SQLite3-API
+opencv-python-headless
