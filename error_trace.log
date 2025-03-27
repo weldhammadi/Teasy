@@ -1,0 +1,161 @@
+
+
+========= NOUVELLE EXCEPTION =========
+Timestamp: 2025-03-27T15:54:59.108180
+Traceback (most recent call last):
+  File "d:\school\HETIC\PYTHON\new_app_3\new_app_3\new_app\app.py", line 99, in <module>
+    veryfi_processor = ReceiptProcessor()
+                       ^^^^^^^^^^^^^^^^^^
+  File "d:\school\HETIC\PYTHON\new_app_3\new_app_3\new_app\receipt_utils.py", line 22, in __init__
+    self._verify_mistral_connection()
+  File "d:\school\HETIC\PYTHON\new_app_3\new_app_3\new_app\receipt_utils.py", line 119, in _verify_mistral_connection
+    response = self.llm_service.generate(test_prompt)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\school\HETIC\PYTHON\new_app_3\new_app_3\new_app\mistral_llm_service.py", line 44, in generate
+    response = requests.post(
+               ^^^^^^^^^^^^^^
+  File "D:\school\HETIC\PYTHON\.venv\Lib\site-packages\requests\api.py", line 115, in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\school\HETIC\PYTHON\.venv\Lib\site-packages\requests\api.py", line 59, in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\school\HETIC\PYTHON\.venv\Lib\site-packages\requests\sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\school\HETIC\PYTHON\.venv\Lib\site-packages\requests\sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\school\HETIC\PYTHON\.venv\Lib\site-packages\requests\adapters.py", line 667, in send
+    resp = conn.urlopen(
+           ^^^^^^^^^^^^^
+  File "D:\school\HETIC\PYTHON\.venv\Lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "D:\school\HETIC\PYTHON\.venv\Lib\site-packages\urllib3\connectionpool.py", line 534, in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+  File "D:\school\HETIC\PYTHON\.venv\Lib\site-packages\urllib3\connection.py", line 516, in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hamza\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 1395, in getresponse
+    response.begin()
+  File "C:\Users\hamza\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 325, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hamza\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 286, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hamza\AppData\Local\Programs\Python\Python311\Lib\socket.py", line 706, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hamza\AppData\Local\Programs\Python\Python311\Lib\ssl.py", line 1314, in recv_into
+    return self.read(nbytes, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hamza\AppData\Local\Programs\Python\Python311\Lib\ssl.py", line 1166, in read
+    return self._sslobj.read(len, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt
+
+=======================================
+
+
+========= NOUVELLE EXCEPTION =========
+Timestamp: 2025-03-27T19:01:24.705938
+Traceback (most recent call last):
+  File "d:\school\HETIC\PYTHON\new_app_3\new_app_3\new_app\app.py", line 141, in <module>
+    storage_status = storage_manager.get_storage_status()
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\school\HETIC\PYTHON\new_app_3\new_app_3\new_app\gcp_storage.py", line 371, in get_storage_status
+    json_blobs = self.list_blobs(prefix="receipts/json/")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\school\HETIC\PYTHON\new_app_3\new_app_3\new_app\gcp_storage.py", line 174, in list_blobs
+    return [blob.name for blob in blobs]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\school\HETIC\PYTHON\new_app_3\new_app_3\new_app\gcp_storage.py", line 174, in <listcomp>
+    return [blob.name for blob in blobs]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\school\HETIC\PYTHON\.venv\Lib\site-packages\google\api_core\page_iterator.py", line 208, in _items_iter
+    for page in self._page_iter(increment=False):
+  File "D:\school\HETIC\PYTHON\.venv\Lib\site-packages\google\api_core\page_iterator.py", line 244, in _page_iter
+    page = self._next_page()
+           ^^^^^^^^^^^^^^^^^
+  File "D:\school\HETIC\PYTHON\.venv\Lib\site-packages\google\api_core\page_iterator.py", line 373, in _next_page
+    response = self._get_next_page_response()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\school\HETIC\PYTHON\.venv\Lib\site-packages\google\api_core\page_iterator.py", line 432, in _get_next_page_response
+    return self.api_request(
+           ^^^^^^^^^^^^^^^^^
+  File "D:\school\HETIC\PYTHON\.venv\Lib\site-packages\google\cloud\storage\_http.py", line 90, in api_request
+    return call()
+           ^^^^^^
+  File "D:\school\HETIC\PYTHON\.venv\Lib\site-packages\google\api_core\retry\retry_unary.py", line 293, in retry_wrapped_func
+    return retry_target(
+           ^^^^^^^^^^^^^
+  File "D:\school\HETIC\PYTHON\.venv\Lib\site-packages\google\api_core\retry\retry_unary.py", line 144, in retry_target
+    result = target()
+             ^^^^^^^^
+  File "D:\school\HETIC\PYTHON\.venv\Lib\site-packages\google\cloud\_http\__init__.py", line 482, in api_request
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "D:\school\HETIC\PYTHON\.venv\Lib\site-packages\google\cloud\_http\__init__.py", line 341, in _make_request
+    return self._do_request(
+           ^^^^^^^^^^^^^^^^^
+  File "D:\school\HETIC\PYTHON\.venv\Lib\site-packages\google\cloud\_http\__init__.py", line 379, in _do_request
+    return self.http.request(
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\school\HETIC\PYTHON\.venv\Lib\site-packages\google\auth\transport\requests.py", line 537, in request
+    response = super(AuthorizedSession, self).request(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\school\HETIC\PYTHON\.venv\Lib\site-packages\requests\sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\school\HETIC\PYTHON\.venv\Lib\site-packages\requests\sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\school\HETIC\PYTHON\.venv\Lib\site-packages\requests\adapters.py", line 667, in send
+    resp = conn.urlopen(
+           ^^^^^^^^^^^^^
+  File "D:\school\HETIC\PYTHON\.venv\Lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "D:\school\HETIC\PYTHON\.venv\Lib\site-packages\urllib3\connectionpool.py", line 534, in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+  File "D:\school\HETIC\PYTHON\.venv\Lib\site-packages\urllib3\connection.py", line 516, in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hamza\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 1395, in getresponse
+    response.begin()
+  File "C:\Users\hamza\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 325, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hamza\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 286, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hamza\AppData\Local\Programs\Python\Python311\Lib\socket.py", line 706, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hamza\AppData\Local\Programs\Python\Python311\Lib\ssl.py", line 1314, in recv_into
+    return self.read(nbytes, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hamza\AppData\Local\Programs\Python\Python311\Lib\ssl.py", line 1166, in read
+    return self._sslobj.read(len, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt
+
+=======================================
+
+
+========= NOUVELLE EXCEPTION =========
+Timestamp: 2025-03-27T21:44:59.639684
+Traceback (most recent call last):
+  File "d:\school\HETIC\PYTHON\new_app\app.py", line 109, in <module>
+    mistral_processor = SimplifiedReceiptProcessor()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\school\HETIC\PYTHON\new_app\advanced_receipt_ocr.py", line 74, in __init__
+    pytesseract.pytesseract.tesseract_cmd = self._get_tesseract_path()
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'SimplifiedReceiptProcessor' object has no attribute '_get_tesseract_path'
+
+=======================================
